@@ -2,7 +2,7 @@ from flask import Flask, render_template, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField , PasswordField, SubmitField
+from wtforms import StringField , PasswordField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, Length, Email, ValidationError
 from flask_bcrypt import Bcrypt
 
@@ -28,6 +28,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(80), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     surname = db.Column(db.String(50), nullable=False)
+    isAdmin = db.Column(db.Boolean, default=True)
 
 
 
@@ -37,6 +38,7 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=20)])
     name = StringField('Name', validators=[InputRequired(), Length(min=2, max=50)])
     surname = StringField('Surname', validators=[InputRequired(), Length(min=2, max=50)])
+    isAdmin = BooleanField('Admin')
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -78,11 +80,22 @@ def login():
 def dashboard():
     return render_template('dashboard.html')
 
+#LOGOUT ROUTE
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+#ADMIN ROUTE
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin():
+    users = User.query.all()
+    if current_user.isAdmin:
+        return render_template('admin.html', users = users)
+    else:
+        return redirect(url_for('dashboard'))
 
 #REGISTER ROUTE
 @app.route('/register', methods=['GET', 'POST'])

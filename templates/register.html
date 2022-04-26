@@ -16,6 +16,7 @@
         <p>Email:</p>{{ form.email }} 
         <p>Name:</p>{{ form.name }} 
         <p>Surname:</p>{{ form.surname }}
+        <p>Are you an admin?</p> {{ form.admin }}
         {{ form.submit }}
 
     <a href="{{url_for('login')}}">Login Here!</a>
