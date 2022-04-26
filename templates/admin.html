@@ -5,11 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>adminadmin</title>
-    {% for user in users %}
-    <p> {{ user.username }}</p>
-    {% endfor %}
+    
 </head>
 <body>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>E-mail</th>
+            <th>Username</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+            {% for user in users %}
+            <tr>
+            <td> {{ user.name }}</td>
+            <td> {{ user.surname }}</td>
+            <td> {{ user.email }}</td>
+            <td> {{ user.username }}</td>
+            <td><a href="/edit/{{ user.id }}">Edit!</a></td>
+            <td><a href="/delete/{{ user.id }}">Delete!</a></td>
+            </tr>   
+            {% endfor %}
+    </table>
     
 </body>
 </html>

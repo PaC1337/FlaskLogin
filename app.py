@@ -56,6 +56,25 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
     submit = SubmitField('Login')
 
+class EditForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=20)])
+    name = StringField('Name', validators=[InputRequired(), Length(min=2, max=50)])
+    surname = StringField('Surname', validators=[InputRequired(), Length(min=2, max=50)])
+    submit = SubmitField('Edit')
+
+    def validate_username(self, username):
+        if username.data != current_user.username:
+            user = User.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError('This username is taken. Please choose a different one.')
+
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = User.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError('This email is taken. Please choose a different one.')
 
 #HOME ROUTE
 @app.route('/')
@@ -95,7 +114,7 @@ def admin():
     if current_user.isAdmin:
         return render_template('admin.html', users = users)
     else:
-        return redirect(url_for('dashboard'))
+        return "You are not an admin"
 
 #REGISTER ROUTE
 @app.route('/register', methods=['GET', 'POST'])
@@ -110,6 +129,28 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html', form = form)
+
+#USER EDIT ROUTE
+@app.route('/edit/<int:id>', methods = ['POST', 'GET'])
+@login_required
+def edit(id):
+    form = EditForm()
+    user = User.query.get(id)
+    if current_user.id == id:
+        return render_template('edit.html', user = user, form = form)
+    else:
+        return "You can only edit your own profile"
+   
+#ADMIN EDIT ROUTE
+@app.route('/admin/edit/<int:id>', methods = ['POST', 'GET'])
+@login_required
+def admin_edit(id):
+    form = EditForm()
+    user = User.query.get(id)
+    if current_user.isAdmin:
+        return render_template('admin_edit.html', user = user, form = form)
+    else:
+        return "You dont have permission to edit this user"
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -8,24 +8,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
     <link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
-    <title>Register</title>
+    <title>Edit user: {{ user.username }}</title>
 </head>
 <body>
     <form method="POST", action="">
         <div class="container">
-            <h1>Register</h1>
+            <h1>Edit user: {{ user.username }}</h1>
             <hr>
             {{ form.hidden_tag() }} 
             <label for="username"><b>Username:</b></label>
-            {{ form.username }} 
-            <label for="password"><b>Password:</b></label>
-            {{ form.password }}
+            {{ form.username(value=user.username)  }}
             <label for="email"><b>Email:</b></label>
-            {{ form.email }}
+            {{ form.email(value=user.email) }}
             <label for="name"><b>Name:</b></label>
-            {{ form.name }}
+            {{ form.name(value=user.name) }}
             <label for="surname"><b>Surname:</b></label>
-            {{ form.surname }}
+            {{ form.surname(value=user.surname) }}
             <hr>
             {{ form.submit(class_="registerbtn") }}
         </div>
