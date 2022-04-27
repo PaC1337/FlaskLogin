@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField , PasswordField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, Length, Email, ValidationError
 from flask_bcrypt import Bcrypt
-
+import sys
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
@@ -28,7 +28,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(80), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     surname = db.Column(db.String(50), nullable=False)
-    isAdmin = db.Column(db.Boolean, default=True)
+    isAdmin = db.Column(db.Boolean, nullable=False , default=False)
 
 
 
@@ -76,6 +76,11 @@ class EditForm(FlaskForm):
             if user:
                 raise ValidationError('This email is taken. Please choose a different one.')
 
+class PasswordChangeForm(FlaskForm):
+    old_password = PasswordField('Old Password', validators=[InputRequired(), Length(min=8, max=20)])
+    new_password = PasswordField('New Password', validators=[InputRequired(), Length(min=8, max=20)])
+    submit = SubmitField('Change')
+
 #HOME ROUTE
 @app.route('/')
 def home():
@@ -97,7 +102,8 @@ def login():
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    user = current_user
+    return render_template('dashboard.html', user = user )
 
 #LOGOUT ROUTE
 @app.route('/logout', methods=['GET', 'POST'])
@@ -136,21 +142,43 @@ def register():
 def edit(id):
     form = EditForm()
     user = User.query.get(id)
-    if current_user.id == id:
+    if ((current_user.id == id) or current_user.isAdmin):
+        if form.validate_on_submit():
+            user.username = form.username.data
+            user.email = form.email.data
+            user.name = form.name.data
+            user.surname = form.surname.data
+            db.session.commit()
         return render_template('edit.html', user = user, form = form)
     else:
         return "You can only edit your own profile"
+    
    
-#ADMIN EDIT ROUTE
-@app.route('/admin/edit/<int:id>', methods = ['POST', 'GET'])
+#DELETE ROUTE
+@app.route('/delete/<int:id>', methods = ['POST', 'GET'])
 @login_required
-def admin_edit(id):
+def delete(id):
+    user = User.query.get(id)
+    if ((current_user.id == id) or current_user.isAdmin):
+        db.session.delete(user)
+        db.session.commit()
+        return redirect(url_for('admin'))
+    else:
+        return "You can only delete your own profile"
+
+#CHANGE PASSWORD ROUTE
+@app.route('/change_password/<int:id>', methods = ['POST', 'GET'])
+@login_required
+def change_password(id):
     form = EditForm()
     user = User.query.get(id)
-    if current_user.isAdmin:
-        return render_template('admin_edit.html', user = user, form = form)
+    if ((current_user.id == id) or current_user.isAdmin):
+        if bcrypt.check_password_hash(user.password, form.password.data):
+            user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+            db.session.commit()
     else:
-        return "You dont have permission to edit this user"
+        return "You can only change your own password"
+    return render_template('change_password.html', user = user, form = form)
 
 if __name__ == '__main__':
     app.run(debug=True)

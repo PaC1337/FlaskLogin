@@ -4,18 +4,31 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href={{ url_for('static', filename='style/style.css') }}>
     <title>Login</title>
 </head>
 <body>
-    <h1>Login</h1>
-
     <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        {{ form.username }}
-        {{ form.password }}
-        {{ form.submit }}
+        <div class="container">
+            <h1>Login</h1>
+            <hr>
+            {{ form.hidden_tag() }}
+            <label for="username"><b>Username:</b></label>
+            {{ form.username }}
+            <label for="password"><b>Password:</b></label>
+            {{ form.password }}
+            <hr>
+            {{ form.submit(class_="registerbtn") }}
+            <div class="container signin">
+                <p>Don't have an account? <a href="{{url_for('register')}}">Sign in</a>.</p>
+            </div>
+            </div>
+            
     </form>
 
-    <a href="{{url_for('register')}}">Sign Up Here!</a>
 </body>
 </html>
