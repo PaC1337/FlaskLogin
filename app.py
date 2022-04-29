@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
@@ -29,6 +29,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(50), nullable=False)
     surname = db.Column(db.String(50), nullable=False)
     isAdmin = db.Column(db.Boolean, nullable=False , default=False)
+    login_couner = db.Column(db.Integer, nullable=False , default=0)
 
 
 
@@ -59,7 +60,6 @@ class LoginForm(FlaskForm):
 class EditForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
     email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=20)])
     name = StringField('Name', validators=[InputRequired(), Length(min=2, max=50)])
     surname = StringField('Surname', validators=[InputRequired(), Length(min=2, max=50)])
     submit = SubmitField('Edit')
@@ -143,13 +143,16 @@ def edit(id):
     form = EditForm()
     user = User.query.get(id)
     if ((current_user.id == id) or current_user.isAdmin):
-        if form.validate_on_submit():
+        if form.is_submitted():
             user.username = form.username.data
             user.email = form.email.data
             user.name = form.name.data
             user.surname = form.surname.data
             db.session.commit()
-        return render_template('edit.html', user = user, form = form)
+            return redirect(url_for('dashboard'))
+        return render_template('edit.html', form = form, user = user)
+
+        
     else:
         return "You can only edit your own profile"
     
@@ -170,15 +173,18 @@ def delete(id):
 @app.route('/change_password/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def change_password(id):
-    form = EditForm()
+    form = PasswordChangeForm()
     user = User.query.get(id)
     if ((current_user.id == id) or current_user.isAdmin):
-        if bcrypt.check_password_hash(user.password, form.password.data):
-            user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-            db.session.commit()
+        if form.is_submitted():
+            if bcrypt.check_password_hash(user.password, form.old_password.data):
+                user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+                db.session.commit()
+                logout_user()
+        return render_template('change_password.html', user = user, form = form)
     else:
         return "You can only change your own password"
-    return render_template('change_password.html', user = user, form = form)
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
