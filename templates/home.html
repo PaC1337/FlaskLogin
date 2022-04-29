@@ -4,11 +4,30 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/home.css') }}">
     <title>Home</title>
 </head>
 <body>
-    <h1>Home</h1>
-    <a href="{{url_for('login')}}">Login Page</a><br/>
-    <a href="{{url_for('register')}}">Register Page</a>
+    
+    <div class="container">
+        <div class="theme">
+            <p>Home</p>
+        </div>
+        <hr>
+        <div class ="welcome"><p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p></div>
+        <hr>
+        <div class="buttons_holder"></div>
+        <a class="btn" href="{{url_for('login')}}">Login Page</a><br/>
+        <hr>
+        <a class="btn" href="{{url_for('register')}}">Register Page</a><br/>
+        <hr>
+        <div class ="fotter">
+            <p>Michał Paczkowski & Mateusz Szostek 2022</p>
+        </div>
+    </div>
 </body>
 </html>
