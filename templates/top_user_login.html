@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <title>Top 3 users</title>
+</head>
+<body>
+    <form method="POST", action="">
+        <div class="container">
+            <h1>Top 3 users login</h1>
+            <hr>
+            <p>{{ users }}</p>
+            
+
+            
+        </div>
+
+        <div class="container signin">
+            <p>Already have an account? <a href="{{url_for('login')}}">Sign in</a>.</p>
+          </div>
+    </form>   
+</body>
+</html>

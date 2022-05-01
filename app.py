@@ -29,7 +29,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(50), nullable=False)
     surname = db.Column(db.String(50), nullable=False)
     isAdmin = db.Column(db.Boolean, nullable=False , default=False)
-    login_couner = db.Column(db.Integer, nullable=False , default=0)
+    login_counter = db.Column(db.Integer, nullable=False , default=0)
 
 
 
@@ -95,6 +95,8 @@ def login():
         if user:
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
+                user.login_counter += 1
+                db.session.commit()
                 return redirect(url_for('dashboard'))
     return render_template('login.html', form = form)
 
@@ -185,6 +187,11 @@ def change_password(id):
     else:
         return "You can only change your own password"
     
+#TOP USER LOGIN ROUTE
+@app.route('/top_user_login', methods = ['POST', 'GET'])
+def top_user_login():
+    users = User.query.order_by(User.login_counter.desc()).limit(3)
+    return render_template('top_user_login.html', users = users)
 
 if __name__ == '__main__':
     app.run(debug=True)
