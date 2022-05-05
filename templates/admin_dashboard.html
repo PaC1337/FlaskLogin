@@ -8,21 +8,25 @@
     <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
-    <title>Top 3 users</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/home.css') }}">
+    <title>Admin Dashboard</title>
 </head>
 <body>
-    <form method="POST", action="">
-        <div class="container">
-            <h1>Top 3 users login</h1>
-            <hr>
-            {% for user in users %}
-            <p>{{ user.username }} Number of logins: {{ user.login_counter }}</p>
-            {% endfor %} 
-            <hr>
-            <a class="button" href="/dashboard">Dashboard</a>
-            
+    
+    <div class="container">
+        <div class="theme">
+            <p>Admin Dashboard</p>
         </div>
-    </form>   
+        <hr>
+        <div class="buttons_holder">
+            <a class="btn" href="{{ url_for('admin_user') }}">Manage users</a><br/>
+            <hr>
+            <a class="btn" href="{{ url_for('admin_book') }}">Manage books</a><br/>
+        </div>
+        <hr>
+        <div class ="fotter">
+            <p>Michał Paczkowski & Mateusz Szostek 2022</p>
+        </div>
+    </div>
 </body>
 </html>

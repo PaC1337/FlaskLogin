@@ -1,16 +1,20 @@
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, flash, render_template, url_for, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField , PasswordField, SubmitField, BooleanField
-from wtforms.validators import InputRequired, Length, Email, ValidationError
+from wtforms import StringField , PasswordField, SubmitField, BooleanField, FileField, TextAreaField, IntegerField
+from wtforms.validators import InputRequired, Length, Email, ValidationError, NumberRange
 from flask_bcrypt import Bcrypt
-import sys
+from werkzeug.utils import secure_filename
+import os
+
+ALLOWED_EXTENSIONS = set(['jpg'])
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secret'
+#app.config["UPLOAD_FOLDER"] = "static/img"
 bcrypt = Bcrypt(app)
 
 login_menager = LoginManager()
@@ -20,6 +24,9 @@ login_menager.login_view = 'login'
 @login_menager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -31,6 +38,15 @@ class User(db.Model, UserMixin):
     isAdmin = db.Column(db.Boolean, nullable=False , default=False)
     login_counter = db.Column(db.Integer, nullable=False , default=0)
 
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(50), unique=True, nullable=False)
+    author = db.Column(db.String(50), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    genre = db.Column(db.String(50), nullable=False)
+    num_pages = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    
 
 
 class RegisterForm(FlaskForm):
@@ -81,11 +97,24 @@ class PasswordChangeForm(FlaskForm):
     new_password = PasswordField('New Password', validators=[InputRequired(), Length(min=8, max=20)])
     submit = SubmitField('Change')
 
+class BookForm(FlaskForm):
+    title = StringField('Title', validators=[InputRequired(), Length(min=2, max=50)])
+    author = StringField('Author', validators=[InputRequired(), Length(min=2, max=50)])
+    year = IntegerField('Year', validators=[InputRequired(), NumberRange(min=1, max=2200)])
+    genre = StringField('Genre', validators=[InputRequired(), Length(min=2, max=50)])
+    num_pages = IntegerField('Number of pages', validators=[InputRequired(), NumberRange(min=1, max=2000)])
+    description = TextAreaField('Description', validators=[InputRequired(), Length(min=2, max=500)])
+    submit = SubmitField('Submit')
+
 #HOME ROUTE
 @app.route('/')
 def home():
     return render_template('home.html')
 
+
+#!!!!!!!!!!!!!!!!!!!!
+#USER STUFF
+#!!!!!!!!!!!!!!!!!!!!
 #LOGIN ROUTE
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -100,29 +129,12 @@ def login():
                 return redirect(url_for('dashboard'))
     return render_template('login.html', form = form)
 
-#DASHBOARD ROUTE
-@app.route('/dashboard', methods=['GET', 'POST'])
-@login_required
-def dashboard():
-    user = current_user
-    return render_template('dashboard.html', user = user )
-
 #LOGOUT ROUTE
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('home'))
-
-#ADMIN ROUTE
-@app.route('/admin', methods=['GET', 'POST'])
-@login_required
-def admin():
-    users = User.query.all()
-    if current_user.isAdmin:
-        return render_template('admin.html', users = users)
-    else:
-        return "You are not an admin"
 
 #REGISTER ROUTE
 @app.route('/register', methods=['GET', 'POST'])
@@ -138,8 +150,24 @@ def register():
 
     return render_template('register.html', form = form)
 
+#CHANGE PASSWORD ROUTE
+@app.route('/change_password/<int:id>', methods = ['POST', 'GET'])
+@login_required
+def change_password(id):
+    form = PasswordChangeForm()
+    user = User.query.get(id)
+    if ((current_user.id == id) or current_user.isAdmin):
+        if form.is_submitted():
+            if bcrypt.check_password_hash(user.password, form.old_password.data):
+                user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+                db.session.commit()
+                logout_user()
+        return render_template('change_password.html', user = user, form = form)
+    else:
+        return "You can only change your own password"
+
 #USER EDIT ROUTE
-@app.route('/edit/<int:id>', methods = ['POST', 'GET'])
+@app.route('/edit_user/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def edit(id):
     form = EditForm()
@@ -157,10 +185,9 @@ def edit(id):
         
     else:
         return "You can only edit your own profile"
-    
-   
-#DELETE ROUTE
-@app.route('/delete/<int:id>', methods = ['POST', 'GET'])
+
+#USER DELETE ROUTE
+@app.route('/delete_user/<int:id>', methods = ['POST', 'GET'])
 @login_required
 def delete(id):
     user = User.query.get(id)
@@ -171,30 +198,117 @@ def delete(id):
     else:
         return "You can only delete your own profile"
 
-#CHANGE PASSWORD ROUTE
-@app.route('/change_password/<int:id>', methods = ['POST', 'GET'])
+  
+#!!!!!!!!!!!!!!!!!!!!!!
+#ADMIN STUFF
+#!!!!!!!!!!!!!!!!!!!!!!
+
+#ADMIN DASHBOARD ROUTE
+@app.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required
-def change_password(id):
-    form = PasswordChangeForm()
-    user = User.query.get(id)
-    if ((current_user.id == id) or current_user.isAdmin):
-        if form.is_submitted():
-            if bcrypt.check_password_hash(user.password, form.old_password.data):
-                user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-                db.session.commit()
-                logout_user()
-        return render_template('change_password.html', user = user, form = form)
+def admin():
+    if current_user.isAdmin:
+        return render_template('admin_dashboard.html')
     else:
-        return "You can only change your own password"
-    
+        return "You are not an admin"
+
+#ADMIN USER ROUTE
+@app.route('/admin_user', methods=['GET', 'POST'])
+@login_required
+def admin_user():
+    if current_user.isAdmin:
+        users = User.query.all()
+        return render_template('admin_user.html', users = users)
+    else:
+        return "You are not an admin"
+
+#ADMIN BOOK ROUTE
+@app.route('/admin_book', methods=['GET', 'POST'])
+@login_required
+def admin_book():
+    if current_user.isAdmin:
+        books = Book.query.all()
+        return render_template('admin_book.html', books = books)
+    else:
+        return "You are not an admin"
+   
+#!!!!!!!!!!!!!!!!!!!!
+#BOOK STUFF
+#!!!!!!!!!!!!!!!!!!!!
+
+#BOOK ADD ROUTE
+@app.route('/add_book', methods=['GET', 'POST'])
+@login_required
+def add_book():
+    form = BookForm()
+    if form.validate_on_submit():
+        book = Book(title=form.title.data, author=form.author.data, year=form.year.data, genre=form.genre.data, num_pages=form.num_pages.data, description=form.description.data)
+        db.session.add(book)
+        db.session.commit()
+        return redirect(url_for('admin_book'))
+    return render_template('add_book.html', form = form)
+
+
+#BOOK DELETE ROUTE
+@app.route('/delete_book/<int:id>', methods = ['POST', 'GET'])
+@login_required
+def delete_book(id):
+    book = Book.query.get(id)
+    if current_user.isAdmin:
+        db.session.delete(book)
+        db.session.commit()
+        return redirect(url_for('admin_book'))
+    else:
+        return "You don't have permission to delete this book"
+
+#BOOK EDIT ROUTE
+@app.route('/book_edit/<int:id>', methods = ['POST', 'GET'])
+@login_required
+def book_edit(id):
+    book = Book.query.get(id)
+    if current_user.isAdmin:
+        form = BookForm()
+        if form.is_submitted():
+            book.title = form.title.data
+            book.author = form.author.data
+            book.year = form.year.data
+            book.genre = form.genre.data
+            book.num_pages = form.num_pages.data
+            book.description = form.description.data
+            db.session.commit()
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+#!!!!!!!!!!!!!!!!!!!!
+#OTHER STUFF
+#!!!!!!!!!!!!!!!!!!!!
+
 #TOP USER LOGIN ROUTE
 @app.route('/top_user_login', methods = ['POST', 'GET'])
 def top_user_login():
     users = User.query.order_by(User.login_counter.desc()).limit(3)
     return render_template('top_user_login.html', users = users)
 
+#DASHBOARD ROUTE
+@app.route('/dashboard', methods=['GET', 'POST'])
+@login_required
+def dashboard():
+    user = current_user
+    return render_template('dashboard.html', user = user )
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
 
-    #test
+
+
