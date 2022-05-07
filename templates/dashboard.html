@@ -15,8 +15,8 @@
     <div class="container">
         <h1>Welcome: {{ user.username }}</h1>
         <hr>
-        <a class="button" href="/edit/{{ user.id }}">Edit your profile</a>
-        <a class="button" href="/delete/{{ user.id }}" style="background-color: red;">Delete your profile</a>
+        <a class="button" href="/edit_user/{{ user.id }}">Edit your profile</a>
+        <a class="button" href="/delete_user/{{ user.id }}" style="background-color: red;">Delete your profile</a>
         <a class="button" href="/change_password/{{ user.id }}">Change Password</a>
         <a class="button" href="{{ url_for('logout') }}">Logout</a>
     </div>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    <title>Admin Books</title>
+    
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Year</th>
+            <th>Genre</th>
+            <th>NumOfPages</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+            {% for book in books %}
+            <tr>
+            <td> {{ book.title }}</td>
+            <td> {{ book.author }}</td>
+            <td> {{ book.year }}</td>
+            <td> {{ book.genre }}</td>
+            <td> {{ book.numOfPages }}</td>
+            <td><a href="/edit_book/{{ book.id }}">Edit!</a></td>
+            <td><a href="/delete_book/{{ book.id }}">Delete!</a></td>
+            </tr>   
+            {% endfor %}
+
+            <hr>
+            <a class="btn" href="{{ url_for('add_book') }}">Add book</a><br/>
+    </table>
+    
+</body>
+</html>
