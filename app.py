@@ -2,19 +2,19 @@ from flask import Flask, flash, render_template, url_for, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField , PasswordField, SubmitField, BooleanField, FileField, TextAreaField, IntegerField
-from wtforms.validators import InputRequired, Length, Email, ValidationError, NumberRange
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms import StringField , PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField
+from wtforms.validators import InputRequired, Length, Email, ValidationError, NumberRange, DataRequired
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 import os
 
-ALLOWED_EXTENSIONS = set(['jpg'])
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secret'
-#app.config["UPLOAD_FOLDER"] = "static/img"
+app.config["UPLOAD_FOLDER"] = "static/bookimg"
 bcrypt = Bcrypt(app)
 
 login_menager = LoginManager()
@@ -24,9 +24,6 @@ login_menager.login_view = 'login'
 @login_menager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -104,6 +101,7 @@ class BookForm(FlaskForm):
     genre = StringField('Genre', validators=[InputRequired(), Length(min=2, max=50)])
     num_pages = IntegerField('Number of pages', validators=[InputRequired(), NumberRange(min=1, max=2000)])
     description = TextAreaField('Description', validators=[InputRequired(), Length(min=2, max=500)])
+    image = FileField('Image', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     submit = SubmitField('Submit')
 
 #HOME ROUTE
@@ -206,7 +204,7 @@ def delete(id):
 #ADMIN DASHBOARD ROUTE
 @app.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required
-def admin():
+def admin_dashboard():
     if current_user.isAdmin:
         return render_template('admin_dashboard.html')
     else:
@@ -245,7 +243,13 @@ def add_book():
         book = Book(title=form.title.data, author=form.author.data, year=form.year.data, genre=form.genre.data, num_pages=form.num_pages.data, description=form.description.data)
         db.session.add(book)
         db.session.commit()
-        return redirect(url_for('admin_book'))
+        form = BookForm(request.POST)
+        if form.image.data:
+            image_data = request.FILES[form.image.name].read()
+            open(os.path.join("static/bookimg", form.image.data), 'w').write(image_data)      
+    else:
+        flash_errors(form)
+
     return render_template('add_book.html', form = form)
 
 
@@ -276,17 +280,7 @@ def book_edit(id):
             book.num_pages = form.num_pages.data
             book.description = form.description.data
             db.session.commit()
-            if 'file' not in request.files:
-                flash('No file part')
-                return redirect(request.url)
-            file = request.files['file']
-            if file.filename == '':
-                flash('No selected file')
-                return redirect(request.url)
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
+            return redirect(url_for('admin_book'))
 #!!!!!!!!!!!!!!!!!!!!
 #OTHER STUFF
 #!!!!!!!!!!!!!!!!!!!!
@@ -304,7 +298,14 @@ def dashboard():
     user = current_user
     return render_template('dashboard.html', user = user )
 
-
+def flash_errors(form):
+    """Flashes form errors"""
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'error')
 
 if __name__ == '__main__':
     app.run(debug=True)

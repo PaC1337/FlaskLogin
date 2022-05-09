@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,9 +12,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
     <title>Add Book</title>
 </head>
+
 <body>
-    <form method="POST", action="">
+    
+    <form method="POST" , action="">
         <div class="container">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
             <h1>Add Book</h1>
             <hr>
             {{ form.hidden_tag() }}
@@ -22,19 +32,21 @@
             <label for="author"><b>Author:</b></label>
             {{ form.author }}
             <label for="year"><b>Year:</b></label>
-            {{ form.year }}
+            {{ form.year }}<br /><br />
             <label for="genre"><b>Genre:</b></label>
             {{ form.genre }}
             <label for="num_pages"><b>Number of pages:</b></label>
-            {{ form.num_pages }}<br/><br/>
+            {{ form.num_pages }}<br /><br />
             <label for="description"><b>Description:</b></label>
-            {{ form.description }}
-            
+            {{ form.description }}<br /><br />
+            <label for="image"><b>Image:</b></label>
+            {{ form.image }}
             <hr>
             {{ form.submit(class_="registerbtn") }}
         </div>
 
-       
-    </form>   
+
+    </form>
 </body>
+
 </html>
