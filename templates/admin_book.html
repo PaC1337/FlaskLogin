@@ -1,39 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
-    <title>Admin Books</title>
-    
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{{  url_for('static', filename='img/favicon.png') }}" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+  </script>
+  <title>Books Manager</title>
 </head>
+
 <body>
-    <table>
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #393e46">
+    <div class="container">
+      <a class="navbar-brand" href="#"><img src="{{  url_for('static', filename='img/logo_transparent.png') }}"
+          alt="Logo" class="img-fluid" width="150px" height="100px" /></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('home') }}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Contact Us</a>
+          </li>
+          {% if current_user.isAdmin %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+          </li>
+          {% endif %}
+        </ul>
+        {% if current_user.is_authenticated %}
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              {{ current_user.username }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <li><a class="dropdown-item" href="{{url_for('dashboard')}}">Profile</a></li>
+              <li><a class="dropdown-item" href="/edit_user/{{ current_user.id }}">Edit profile</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+        {% else %}
+        <div class="d-flex">
+          <a class="btn btn-secondary" href="{{url_for('login')}}">Login</a> &nbsp;
+          <a class="btn btn-secondary" href="{{url_for('register')}}">Register</a>
+          <ul class="dropdown-menu">
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  <div class="container">
+    <hr>
+    <table class="table table-striped">
+      <thead>
         <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Year</th>
-            <th>Genre</th>
-            <th>NumOfPages</th>
-            <th>Edit</th>
-            <th>Delete</th>
+          <th scope="col">Title</th>
+          <th scope="col">Author</th>
+          <th scope="col">Year</th>
+          <th scope="col">Genre</th>
+          <th scope="col">NumOfPages</th>
+          <th scope="col">Edit!</th>
+          <th scope="col">Delete!</th>
         </tr>
-            {% for book in books %}
-            <tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          {% for book in books %}
+        <tr>
             <td> {{ book.title }}</td>
             <td> {{ book.author }}</td>
             <td> {{ book.year }}</td>
             <td> {{ book.genre }}</td>
             <td> {{ book.numOfPages }}</td>
-            <td><a href="/edit_book/{{ book.id }}">Edit!</a></td>
-            <td><a href="/delete_book/{{ book.id }}">Delete!</a></td>
-            </tr>   
-            {% endfor %}
-
-            <hr>
-            <a class="btn" href="{{ url_for('add_book') }}">Add book</a><br/>
+            <td><a href="/edit_book/{{ book.id }}" class="btn btn-warning">Edit!</a></td>
+            <td><a href="/delete_book/{{ book.id }}" class="btn btn-danger">Delete!</a></td>
+        </tr>
+        {% endfor %}
+        </tr>
+      </tbody>
+      <a class="btn btn-dark" href="{{ url_for('add_book') }}" >Add book</a><br/>
     </table>
-    
+  </div>
 </body>
+
 </html>
