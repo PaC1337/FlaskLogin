@@ -1,0 +1,16 @@
+.form-container{
+    background:#fff;
+    padding: 45px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 0px #000;
+    top: 50px;
+}
+
+.form-wrap{
+    position: absolute;
+    padding: 50px;
+    top: 10%;
+    left: 36%;
+    right: 36%;
+}
+
