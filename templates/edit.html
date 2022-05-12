@@ -49,7 +49,7 @@
           </div>    <!--Ending div to align username right-->
         </div>
       </nav>
-   <div class="form-wrap">
+   <div class="form-wrap"> <!--Proper center aligment needed ASAP XD-->
         <div class="asd">
             <form method="POST", action="" class="form-container">
                 <h2>Edit user: {{ user.username }}</h2>
@@ -83,41 +83,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </body>
 </html>
-
-
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
-    <title>Edit user: {{ user.username }}</title>
-</head>
-<body>
-    <form method="POST", action="">
-        <div class="container">
-            <h1>Edit user: {{ user.username }}</h1>
-            <hr>
-            {{ form.hidden_tag() }} 
-            <label for="username"><b>Username:</b></label>
-            {{ form.username(value=user.username)  }}
-            <label for="email"><b>Email:</b></label>
-            {{ form.email(value=user.email) }}
-            <label for="name"><b>Name:</b></label>
-            {{ form.name(value=user.name) }}
-            <label for="surname"><b>Surname:</b></label>
-            {{ form.surname(value=user.surname) }}
-            <hr>
-            {{ form.submit(class_="registerbtn") }}
-        </div>
-    </form>   
-</body>
-</html> -->
