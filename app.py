@@ -101,7 +101,7 @@ class BookForm(FlaskForm):
     genre = StringField('Genre', validators=[InputRequired(), Length(min=2, max=50)])
     num_pages = IntegerField('Number of pages', validators=[InputRequired(), NumberRange(min=1, max=2000)])
     description = TextAreaField('Description', validators=[InputRequired(), Length(min=2, max=500)])
-    image = FileField('Image', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
+    image = FileField('Image', validators=[FileAllowed(['png'], 'Images only!')])
     submit = SubmitField('Submit')
 
 #HOME ROUTE
@@ -243,10 +243,10 @@ def add_book():
         book = Book(title=form.title.data, author=form.author.data, year=form.year.data, genre=form.genre.data, num_pages=form.num_pages.data, description=form.description.data)
         db.session.add(book)
         db.session.commit()
-        form = BookForm(request.POST)
+        #upload image png from form 
         if form.image.data:
-            image_data = request.FILES[form.image.name].read()
-            open(os.path.join("static/bookimg", form.image.data), 'w').write(image_data)      
+            filename = secure_filename(form.title.data + '.png')
+            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     else:
         flash_errors(form)
 
