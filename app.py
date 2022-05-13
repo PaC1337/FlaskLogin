@@ -247,6 +247,7 @@ def add_book():
         if form.image.data:
             filename = secure_filename(form.title.data + '.png')
             form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return redirect(url_for('home'))
     else:
         flash_errors(form)
 
