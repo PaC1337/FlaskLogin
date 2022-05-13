@@ -15,12 +15,60 @@
 <body style="background-color: #f5f5f5">
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #393e46">
         <div class="container">
-            <a class="navbar-brand" href="{{url_for('home')}}"><img src="{{  url_for('static', filename='img/logo_transparent.png') }}"
-              alt="Logo" class="img-fluid" width="150px" height="100px" />
-            </a>
+          <a class="navbar-brand" href="{{ url_for('home') }}"><img
+              src="{{  url_for('static', filename='img/logo_transparent.png') }}" alt="Logo" class="img-fluid" width="150px"
+              height="100px" /></a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav mx-auto">
+              <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('home') }}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('top_user_login') }}">Top users</a>
+              </li>
+              {% if current_user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('add_book')}}">Add book</a>
+              </li>
+              {% endif %}
+              {% if current_user.isAdmin %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_user') }}">Manage Users</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_book') }}">Manage Books</a>
+              </li>
+              {% endif %}
+            </ul>
+            {% if current_user.is_authenticated %}
+            <ul class="navbar-nav">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+                  {{ current_user.username }}
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                  <li><a class="dropdown-item" href="{{url_for('dashboard')}}">Profile</a></li>
+                  <li><a class="dropdown-item" href="/edit_user/{{ current_user.id }}">Edit profile</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+              </li>
+            </ul>
+            {% else %}
+            <div class="d-flex">
+              <a class="btn btn-secondary" href="{{url_for('login')}}">Login</a> &nbsp;
+              <a class="btn btn-secondary" href="{{url_for('register')}}">Register</a>
+              <ul class="dropdown-menu">
+            </div>
+            {% endif %}
+          </div>
         </div>
-    </nav>
-        <div class="form-wrap"> <!--Proper center aligment needed ASAP XD-->
+      </nav>
+        <div class="d-flex justify-content-center"> <!--Proper center aligment needed ASAP XD-->
             <div class="asd">
                 <form method="POST", action="" class="form-container">
                     <div class="container">
@@ -58,61 +106,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" href="{{  url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
-    <title>Register</title>
-</head>
-<body>
-    <form method="POST", action="">
-        <div class="container">
-            <h1>Register</h1>
-            <hr>
-            {{ form.hidden_tag() }} 
-            <label for="username"><b>Username:</b></label>
-            {{ form.username }} 
-            <label for="password"><b>Password:</b></label>
-            {{ form.password }}
-            <label for="email"><b>Email:</b></label>
-            {{ form.email }}
-            <label for="name"><b>Name:</b></label>
-            {{ form.name }}
-            <label for="surname"><b>Surname:</b></label>
-            {{ form.surname }}
-            <hr>
-            {{ form.submit(class_="registerbtn") }}
-        </div>
-
-        <div class="container signin">
-            <p>Already have an account? <a href="{{url_for('login')}}">Sign in</a>.</p>
-          </div>
-    </form>   
-</body>
-</html> -->
