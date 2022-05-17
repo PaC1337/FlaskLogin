@@ -7,6 +7,7 @@ from wtforms import StringField , PasswordField, SubmitField, BooleanField, Text
 from wtforms.validators import InputRequired, Length, Email, ValidationError, NumberRange, DataRequired
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
+import uuid
 import os
 
 
@@ -43,6 +44,7 @@ class Book(db.Model):
     genre = db.Column(db.String(50), nullable=False)
     num_pages = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
+    image = db.Column(db.String(50), nullable=False, default='default.jpg')
     
 
 
@@ -104,10 +106,22 @@ class BookForm(FlaskForm):
     image = FileField('Image', validators=[FileAllowed(['png'], 'Images only!')])
     submit = SubmitField('Submit')
 
+class ViewForm(FlaskForm):
+    submit = SubmitField()
+
 #HOME ROUTE
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('home.html')
+    books = Book.query.all()
+    form = ViewForm()
+    view = "gallery"
+    if request.method == 'POST':
+        if request.form['submit'] == 'list':
+            return render_template('home.html', books=books, view="list", form=form)
+        else:
+            return render_template('home.html', books=books, view=view, form=form)
+    return render_template('home.html', books=books, view=view, form=form)
+    
 
 
 #!!!!!!!!!!!!!!!!!!!!
@@ -124,7 +138,7 @@ def login():
                 login_user(user)
                 user.login_counter += 1
                 db.session.commit()
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('home'))
     return render_template('login.html', form = form)
 
 #LOGOUT ROUTE
@@ -238,20 +252,24 @@ def admin_book():
 @app.route('/add_book', methods=['GET', 'POST'])
 @login_required
 def add_book():
-    form = BookForm()
-    if form.validate_on_submit():
-        book = Book(title=form.title.data, author=form.author.data, year=form.year.data, genre=form.genre.data, num_pages=form.num_pages.data, description=form.description.data)
-        db.session.add(book)
-        db.session.commit()
-        #upload image png from form 
-        if form.image.data:
-            filename = secure_filename(form.title.data + '.png')
-            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect(url_for('home'))
+    if current_user.isAdmin:
+        form = BookForm()
+        if form.validate_on_submit():
+            book = Book(title=form.title.data, author=form.author.data, year=form.year.data, genre=form.genre.data, num_pages=form.num_pages.data, description=form.description.data)
+            db.session.add(book)
+            db.session.commit()
+            #upload image png from form 
+            if form.image.data:
+                filename = str(uuid.uuid4()) + secure_filename(form.image.data.filename)
+                form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                book.image = filename
+                db.session.commit()
+            return redirect(url_for('home'))
+        else:
+            flash_errors(form)
+        return render_template('add_book.html', form = form)
     else:
-        flash_errors(form)
-
-    return render_template('add_book.html', form = form)
+        return "You are not an admin"
 
 
 #BOOK DELETE ROUTE
@@ -267,13 +285,13 @@ def delete_book(id):
         return "You don't have permission to delete this book"
 
 #BOOK EDIT ROUTE
-@app.route('/book_edit/<int:id>', methods = ['POST', 'GET'])
+@app.route('/edit_book/<int:id>', methods = ['POST', 'GET'])
 @login_required
-def book_edit(id):
+def edit_book(id):
     book = Book.query.get(id)
     if current_user.isAdmin:
         form = BookForm()
-        if form.is_submitted():
+        if form.validate_on_submit():
             book.title = form.title.data
             book.author = form.author.data
             book.year = form.year.data
@@ -282,6 +300,13 @@ def book_edit(id):
             book.description = form.description.data
             db.session.commit()
             return redirect(url_for('admin_book'))
+        return render_template('edit_book.html', form = form, book = book)
+
+@app.route('/book/<int:id>', methods = ['POST', 'GET'])
+def book(id):
+    book = Book.query.get(id)
+    return render_template('book.html', book = book)
+
 #!!!!!!!!!!!!!!!!!!!!
 #OTHER STUFF
 #!!!!!!!!!!!!!!!!!!!!

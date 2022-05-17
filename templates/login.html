@@ -94,11 +94,11 @@
                 <img class="mb-4" src="{{  url_for('static', filename='img/logo.png') }}" alt="" width="200">
                 <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
                     {{ form.hidden_tag() }}
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     {{ form.username(class="form-control", id="floatingInput", placeholder="Username") }}
                     <label for="floatingInput">Username</label>
                 </div>
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     {{ form.password(class="form-control", id="floatingInput", placeholder="Password") }}
                     <label for="floatingPassword">Password</label>
                 </div>

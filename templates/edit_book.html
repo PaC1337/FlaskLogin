@@ -70,30 +70,34 @@
       </nav>
         <div class="form-wrap justify-content-center"> <!--Proper center aligment needed ASAP XD-->
             <div class="asd">
-                <form method="POST", action="" class="form-container">
+                <form method="POST", action="" class="form-container" enctype="multipart/form-data">
                     <div class="container">
-                        <center><h1>Register</h1></center>
+                        <center><h1>Add Book</h1></center>
                         <hr>
                             {{ form.hidden_tag() }}
                             <div class="form-floating mb-2">
-                                {{ form.username(class="form-control", id="floatingInput", placeholder="Username") }}
-                                <label for="floatingInput">Username</label>
+                                {{ form.title(class="form-control", id="floatingInput", placeholder="Title", value=book.title) }}
+                                <label for="floatingInput">Title</label>
                             </div>
                             <div class="form-floating mb-2">
-                                {{ form.password(class="form-control", id="floatingInput", placeholder="Password") }}
-                                <label for="floatingInput">Password</label>
+                                {{ form.author(class="form-control", id="floatingInput", placeholder="Author", value=book.author) }}
+                                <label for="floatingInput">Author</label>
                             </div>
                             <div class="form-floating mb-2">
-                                {{ form.email(class="form-control", id="floatingInput", placeholder="E-mail") }}
-                                <label for="floatingInput">E-mail</label>
-                            </div> 
-                            <div class="form-floating mb-2">
-                                {{ form.name(class="form-control", id="floatingInput", placeholder="Name") }}
-                                <label for="floatingInput">Name</label>
+                                {{ form.year(class="form-control", id="floatingInput", placeholder="Year", value=book.year) }}
+                                <label for="floatingInput">Year</label>
                             </div>
                             <div class="form-floating mb-2">
-                                {{ form.surname(class="form-control", id="floatingInput", placeholder="Surname") }}
-                                <label for="floatingInput">Surname</label>
+                                {{ form.genre(class="form-control", id="floatingInput", placeholder="Genre", value=book.genre) }}
+                                <label for="floatingInput">Genre</label>
+                            </div>
+                            <div class="form-floating mb-2">
+                                {{ form.num_pages(class="form-control", id="floatingInput", placeholder="Number of Pages", value=book.num_pages) }}
+                                <label for="floatingInput">Number of Pages</label>
+                            </div>
+                            <div class="form-floating mb-2">
+                                {{ form.description(class="form-control", id="floatingInput", placeholder="Description", value=book.description) }}
+                                <label for="floatingInput">Description</label>
                             </div>
                             <hr>
                             <br>
