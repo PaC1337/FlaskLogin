@@ -298,6 +298,10 @@ def edit_book(id):
             book.genre = form.genre.data
             book.num_pages = form.num_pages.data
             book.description = form.description.data
+            if form.image.data:
+                filename = str(uuid.uuid4()) + secure_filename(form.image.data.filename)
+                form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                book.image = filename
             db.session.commit()
             return redirect(url_for('admin_book'))
         return render_template('edit_book.html', form = form, book = book)

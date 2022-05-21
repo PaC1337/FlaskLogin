@@ -1,97 +1,58 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{{  url_for('static', filename='img/favicon.png') }}" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
-    </script>
-    <title>Home</title>
-    <style>
-      .zdjecie {
-      object-fit: none; /* Do not scale the image */
-      object-position: center; /* Center the image within the element */
-      width: 100%;
-      height: 400px;
-      margin-bottom: 1rem;
-      }
-      .zdjecie2 {
-      object-position: center; /* Center the image within the element */
-      width: 100%;
-      height: 120px;
-      margin-bottom: 1rem;
-      }
-    </style>
-</head>
-
+{% block title%}
+Home
+{% endblock %}
+{% block head %}
+{{ super() }}
+<style>
+  .zdjecie {
+  object-fit: none; /* Do not scale the image */
+  object-position: center; /* Center the image within the element */
+  width: 100%;
+  height: 400px;
+  margin-bottom: 1rem;
+  }
+  .zdjecie2 {
+  object-position: center;
+  width: 100%;
+  height: 120px;
+  margin-bottom: 1rem;
+  }
+  .list{
+    background-image: url("{{ url_for('static', filename='img/list.png') }}");
+    background-color: transparent;
+    border: 0;
+    background-size: 64px 64px;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: transparent;
+    padding: 40px;
+  }
+  .gallery {
+    background-image: url("{{ url_for('static', filename='img/gallery.png') }}");
+    background-color: transparent;
+    border: 0;
+    background-size: 64px 64px;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: transparent;
+    padding: 40px;
+  }
+</style>
+{% endblock %}
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #393e46">
-    <div class="container">
-      <a class="navbar-brand" href="{{ url_for('home') }}"><img
-          src="{{  url_for('static', filename='img/logo_transparent.png') }}" alt="Logo" class="img-fluid" width="150px"
-          height="100px" /></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav mx-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('home') }}">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('top_user_login') }}">Top users</a>
-          </li>
-          {% if current_user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('add_book')}}">Add book</a>
-          </li>
-          {% endif %}
-          {% if current_user.isAdmin %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin_user') }}">Manage Users</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin_book') }}">Manage Books</a>
-          </li>
-          {% endif %}
-        </ul>
-        {% if current_user.is_authenticated %}
-        <ul class="navbar-nav">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              {{ current_user.username }}
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <li><a class="dropdown-item" href="{{url_for('dashboard')}}">Profile</a></li>
-              <li><a class="dropdown-item" href="/edit_user/{{ current_user.id }}">Edit profile</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
-            </ul>
-          </li>
-        </ul>
-        {% else %}
-        <div class="d-flex">
-          <a class="btn btn-secondary" href="{{url_for('login')}}">Login</a> &nbsp;
-          <a class="btn btn-secondary" href="{{url_for('register')}}">Register</a>
-          <ul class="dropdown-menu">
-        </div>
-        {% endif %}
-      </div>
-    </div>
-  </nav>
+  {% block navbar %}
+  {{ super ()}}
+  {% endblock %}
+  {% block content %}
   <main>
     {% if view=='list' %}
     <div class="container">
       <form method="POST">
         {{ form.hidden_tag() }}
-        {{ form.submit(value="gallery") }}
+        {{ form.submit(value="gallery", class="gallery") }}
       </form>
       <div class="row">
           <ul class="list-group">
@@ -121,7 +82,7 @@
       <div class="container">
         <form method="POST">
         {{ form.hidden_tag() }}
-        {{ form.submit(value="list") }}
+        {{ form.submit(value="list", class="list") }}
         </form>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
           {% for book in books %}
@@ -134,13 +95,13 @@
                 <p class="card-text">{{ book.author }}</p>
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="btn-group">
-                    <a href="" class="btn btn-sm btn-outline-secondary">View</a>
+                    <a href="/book/{{book.id}}" class="btn btn-sm btn-outline-secondary">View</a>
                     {% if current_user.is_authenticated %}
-                    <a href="/book_edit/{{book.id}}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    <a href="/book_delete/{{book.id}}" class="btn btn-sm btn-outline-secondary">Delete</a>
+                    <a href="/edit_book/{{book.id}}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <a href="/delete_book/{{book.id}}" class="btn btn-sm btn-outline-secondary">Delete</a>
                     {% endif %}
                   </div>
-                  <small class="text-muted">9 mins</small>
+                  
                 </div>
               </div>
             </div>
@@ -152,15 +113,11 @@
     {% endif %}
 
   </main>
-  
-  <footer class="text-muted py-5">
-    <div class="container">
-      <p class="float-end mb-1">
-        <a href="#">Back to top</a>
-      </p>
-      <p class="mb-1">Michał Paczkowski & Mateusz Szostek 2022 &copy;</p>
-    </div>
-  </footer>
+  {% endblock %}
+  {% block footer %}
+  {{ super() }}
+  {% endblock %}
+
 </body>
 
 </html>
