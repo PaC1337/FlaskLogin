@@ -103,7 +103,7 @@ class BookForm(FlaskForm):
     genre = StringField('Genre', validators=[InputRequired(), Length(min=2, max=50)])
     num_pages = IntegerField('Number of pages', validators=[InputRequired(), NumberRange(min=1, max=2000)])
     description = TextAreaField('Description', validators=[InputRequired(), Length(min=2, max=500)])
-    image = FileField('Image', validators=[FileAllowed(['png'], 'Images only!')])
+    image = FileField('Image', validators=[FileAllowed(['png', 'jpg'], 'Images only!')])
     submit = SubmitField('Submit')
 
 class ViewForm(FlaskForm):
@@ -206,7 +206,7 @@ def delete(id):
     if ((current_user.id == id) or current_user.isAdmin):
         db.session.delete(user)
         db.session.commit()
-        return redirect(url_for('admin'))
+        return redirect(url_for('admin_user'))
     else:
         return "You can only delete your own profile"
 
@@ -280,6 +280,7 @@ def delete_book(id):
     if current_user.isAdmin:
         db.session.delete(book)
         db.session.commit()
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], book.image))
         return redirect(url_for('admin_book'))
     else:
         return "You don't have permission to delete this book"
